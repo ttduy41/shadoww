@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHADOW SHOP - HỆ THỐNG VIP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #7b2cbf; --cyan: #00f2ff; --bg: #050505; --card: #12141d; --text: #e2e8f0; --red: #ff4d4d; --green: #00ff88; --orange: #f39c12; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
+        
+        .header { background: var(--card); padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 100; }
+        .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: var(--card); transition: 0.4s; z-index: 1000; padding: 25px; border-right: 1px solid var(--primary); }
+        .sidebar.active { left: 0; }
+        .menu-item { padding: 15px; cursor: pointer; color: white; display: flex; align-items: center; gap: 12px; border-radius: 10px; transition: 0.3s; margin-bottom: 5px; border-bottom: 1px solid #1e212e; }
+        .menu-item:hover { background: rgba(123, 44, 191, 0.2); color: var(--cyan); }
+
+        .container { padding: 15px; max-width: 800px; margin: auto; }
+        .card { background: var(--card); border-radius: 20px; overflow: hidden; border: 1px solid #2d334a; margin-bottom: 25px; position: relative; }
+        
+        .badge { position: absolute; top: 15px; right: 15px; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 900; z-index: 10; text-transform: uppercase; }
+        .badge-on { background: var(--green); color: #000; box-shadow: 0 0 15px var(--green); }
+        .badge-off { background: var(--red); color: #fff; box-shadow: 0 0 15px var(--red); }
+
+        .p-info { padding: 20px; }
+        .input-pro { width: 100%; padding: 14px; margin: 10px 0; background: #080a12; border: 1px solid #333; color: white; border-radius: 12px; outline: none; }
+        .input-pro:focus { border-color: var(--cyan); }
+        
+        .btn-main { width: 100%; padding: 16px; background: var(--cyan); border: none; font-weight: 900; cursor: pointer; border-radius: 12px; color: #000; transition: 0.3s; text-transform: uppercase; }
+        .btn-main:disabled { background: #2d334a; color: #64748b; cursor: not-allowed; }
+        
+        .price-big { font-size: 30px; color: var(--cyan); font-weight: 800; margin: 10px 0; display: block; }
+        .key-view { background: rgba(0, 255, 136, 0.05); border: 1px dashed var(--green); padding: 15px; border-radius: 12px; color: var(--green); word-break: break-all; font-family: monospace; }
+        .p-img { width: 100%; height: 200px; object-fit: cover; border-bottom: 1px solid #2d334a; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-ui" class="container" style="margin-top:80px; text-align:center;">
+        <div class="card" style="max-width:380px; margin:auto; padding:30px; border: 2px solid var(--primary);">
+            <h2 style="color:var(--cyan)">SHADOW LOGIN</h2>
+            <input type="text" id="user" class="input-pro" placeholder="Tên tài khoản">
+            <input type="password" id="pass" class="input-pro" placeholder="Mật khẩu">
+            <button class="btn-main" onclick="handleAuth()">ĐĂNG NHẬP / ĐĂNG KÝ</button>
+        </div>
+    </div>
+
+    <div id="main-app" style="display:none">
+        <div class="header">
+            <i class="fas fa-bars" onclick="toggleSidebar()" style="cursor:pointer; color:var(--cyan); font-size:22px;"></i>
+            <div style="font-weight:900;">SHADOW <span style="color:var(--cyan)">SHOP</span></div>
+            <div id="top-balance" style="color:var(--green); font-weight:bold; background: rgba(0,255,136,0.1); padding: 6px 15px; border-radius: 30px;">0đ</div>
+        </div>
+
+        <div id="sidebar" class="sidebar">
+            <h3 style="color:var(--cyan)">MENU CHÍNH</h3>
+            <div class="menu-item" onclick="showPage('home')"><i class="fas fa-shopping-cart"></i> Mua Sản Phẩm</div>
+            <div class="menu-item" onclick="showPage('napthe')"><i class="fas fa-credit-card"></i> Nạp Thẻ Cào</div>
+            <div class="menu-item" onclick="showPage('history')"><i class="fas fa-history"></i> Lịch Sử Đơn</div>
+            
+            <div id="admin-area" style="display:none; border-top: 2px solid var(--primary); margin-top:20px; padding-top: 15px;">
+                <div class="menu-item" onclick="showPage('admin-cards')" style="color:var(--orange)"><i class="fas fa-check-double"></i> DUYỆT THẺ NẠP</div>
+                <div class="menu-item" onclick="showPage('admin-keys')" style="color:var(--cyan)"><i class="fas fa-box"></i> NHẬP KHO HÀNG</div>
+            </div>
+            <div class="menu-item" onclick="logout()" style="color:var(--red); margin-top:40px;"><i class="fas fa-power-off"></i> Đăng xuất</div>
+        </div>
+
+        <div id="page-home" class="container">
+            <div class="card">
+                <div id="status-zygame" class="badge">ĐANG TẢI...</div>
+                <img src="zygame.jpg" class="p-img">
+                <div class="p-info">
+                    <h3>ZYGAME VIP SYSTEM</h3>
+                    <select id="buy-zygame-type" class="input-pro" onchange="checkStockUI('Zygame')">
+                        <option value="35000|1day">Gói 1 Ngày - 35.000đ</option>
+                        <option value="55000|3day">Gói 3 Ngày - 55.000đ</option>
+                        <option value="85000|7day">Gói 7 Ngày - 85.000đ</option>
+                        <option value="130000|30day">Gói 30 Ngày - 130.000đ</option>
+                    </select>
+                    <span class="price-big" id="price-zygame">35.000đ</span>
+                    <button id="btn-zygame" class="btn-main" onclick="buyKey('Zygame')">Mua Ngay</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div id="status-drip" class="badge">ĐANG TẢI...</div>
+                <img src="drip.jpg" class="p-img">
+                <div class="p-info">
+                    <h3>DRIP SILENT MOD</h3>
+                    <select id="buy-drip-type" class="input-pro" onchange="checkStockUI('Drip')">
+                        <option value="50000|1day">Gói 1 Ngày - 50.000đ</option>
+                        <option value="100000|7day">Gói 7 Ngày - 100.000đ</option>
+                        <option value="160000|30day">Gói 30 Ngày - 160.000đ</option>
+                    </select>
+                    <span class="price-big" id="price-drip">50.000đ</span>
+                    <button id="btn-drip" class="btn-main" onclick="buyKey('Drip')">Mua Ngay</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div id="status-clone" class="badge">ĐANG TẢI...</div>
+                <img src="lv5.jpg" class="p-img">
+                <div class="p-info">
+                    <h3>ACC CLONE FF (Level 5)</h3>
+                    <span class="price-big">2.500đ</span>
+                    <button id="btn-clone" class="btn-main" onclick="buyKey('Clone')">Mua Ngay</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-napthe" class="container" style="display:none">
+            <div class="card p-info">
+                <h3>NẠP THẺ CÀO (ADMIN DUYỆT)</h3>
+                <label>Loại thẻ:</label>
+                <select id="card-type" class="input-pro" onchange="updateRate()">
+                    <option value="Viettel">Viettel</option><option value="Vinaphone">Vinaphone</option>
+                    <option value="Mobifone">Mobifone</option><option value="Vietnamobile">Vietnamobile</option>
+                    <option value="Zing">Thẻ Zing</option><option value="Garena">Thẻ Garena</option><option value="Vcoin">Thẻ Vcoin</option>
+                </select>
+                <label>Mệnh giá:</label>
+                <select id="card-amount" class="input-pro" onchange="updateRate()">
+                    <option value="10000">10.000đ</option><option value="20000">20.000đ</option><option value="50000">50.000đ</option>
+                    <option value="100000">100.000đ</option><option value="200000">200.000đ</option><option value="500000">500.000đ</option>
+                </select>
+                <div style="background:rgba(0,255,136,0.1); padding:10px; border-radius:10px; text-align:center; margin:10px 0;">
+                    <span id="receive-amount" style="color:var(--green); font-weight:bold;">Thực nhận: 8.700đ</span>
+                </div>
+                <input type="text" id="seri" class="input-pro" placeholder="Số Seri">
+                <input type="text" id="pin" class="input-pro" placeholder="Mã thẻ (PIN)">
+                <button class="btn-main" onclick="requestNap()">Gửi Thẻ Chờ Duyệt</button>
+            </div>
+        </div>
+
+        <div id="page-admin-cards" class="container" style="display:none">
+            <h3 style="color:var(--orange)">THẺ ĐANG CHỜ DUYỆT</h3>
+            <div id="admin-card-list"></div>
+        </div>
+
+        <div id="page-admin-keys" class="container" style="display:none">
+            <div class="card p-info">
+                <h3>NHẬP HÀNG</h3>
+                <select id="adm-p" class="input-pro" onchange="updateAdminTime()">
+                    <option value="Zygame">Zygame</option><option value="Drip">Drip</option><option value="Clone">Acc Clone</option>
+                </select>
+                <select id="adm-t" class="input-pro"></select>
+                <textarea id="adm-keys" class="input-pro" rows="5" placeholder="Mỗi dòng 1 Key/Acc"></textarea>
+                <button class="btn-main" onclick="adminAddKey()">Lưu Kho</button>
+            </div>
+            <div id="stock-report" class="p-info" style="font-size:13px;"></div>
+        </div>
+
+        <div id="page-history" class="container" style="display:none">
+            <h3 style="color:var(--cyan)">LỊCH SỬ MUA</h3>
+            <div id="history-list"></div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_ACC = { u: "shadow+999", p: "HV0308hv" };
+        const RATES = { "Viettel": 0.87, "Vinaphone": 0.90, "Mobifone": 0.82, "Vietnamobile": 0.80, "Zing": 0.87, "Garena": 0.87, "Vcoin": 0.85 };
+
+        let data = JSON.parse(localStorage.getItem('shadow_v3_db')) || {
+            currentUser: null, users: {}, pendingCards: [], orders: {},
+            stock: { "Zygame_1day":[], "Zygame_3day":[], "Zygame_7day":[], "Zygame_30day":[], "Drip_1day":[], "Drip_7day":[], "Drip_30day":[], "Clone_vinhvien":[] }
+        };
+
+        function save() { localStorage.setItem('shadow_v3_db', JSON.stringify(data)); }
+
+        function handleAuth() {
+            const u = document.getElementById('user').value.trim(), p = document.getElementById('pass').value.trim();
+            if(!u || !p) return;
+            if(!data.users[u]) data.users[u] = { pass: p, balance: 0 };
+            if(data.users[u].pass === p) { data.currentUser = u; login(); } else alert("Sai MK!");
+        }
+
+        function login() {
+            document.getElementById('auth-ui').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.getElementById('admin-area').style.display = (data.currentUser === ADMIN_ACC.u) ? 'block' : 'none';
+            updateUI(); showPage('home');
+        }
+
+        function checkStockUI(prod) {
+            let key = (prod === 'Clone') ? "Clone_vinhvien" : `${prod}_${document.getElementById(`buy-${prod.toLowerCase()}-type`).value.split('|')[1]}`;
+            if(prod !== 'Clone') document.getElementById(`price-${prod.toLowerCase()}`).innerText = parseInt(document.getElementById(`buy-${prod.toLowerCase()}-type`).value.split('|')[0]).toLocaleString() + "đ";
+            const count = data.stock[key]?.length || 0;
+            const b = document.getElementById(`status-${prod.toLowerCase()}`), btn = document.getElementById(`btn-${prod.toLowerCase()}`);
+            b.innerText = count > 0 ? `CÒN HÀNG (${count})` : "HẾT HÀNG";
+            b.className = count > 0 ? "badge badge-on" : "badge badge-off";
+            btn.disabled = count <= 0;
+        }
+
+        function buyKey(prod) {
+            const u = data.users[data.currentUser];
+            let price, time, keyS;
+            if(prod==='Clone') { price=2500; time='vinhvien'; keyS="Clone_vinhvien"; }
+            else { [price, time] = document.getElementById(`buy-${prod.toLowerCase()}-type`).value.split('|'); keyS=`${prod}_${time}`; }
+            if(u.balance < price) return alert("Hết tiền!");
+            if(confirm("Xác nhận mua?")) {
+                const key = data.stock[keyS].shift();
+                u.balance -= parseInt(price);
+                if(!data.orders[data.currentUser]) data.orders[data.currentUser] = [];
+                data.orders[data.currentUser].unshift({ name: prod, time, key, date: new Date().toLocaleString() });
+                save(); updateUI(); checkStockUI(prod); showPage('history');
+            }
+        }
+
+        function updateRate() {
+            const t = document.getElementById('card-type').value, a = document.getElementById('card-amount').value;
+            document.getElementById('receive-amount').innerText = `Thực nhận: ${Math.floor(a * RATES[t]).toLocaleString()}đ`;
+        }
+
+        function requestNap() {
+            const t = document.getElementById('card-type').value, a = parseInt(document.getElementById('card-amount').value);
+            const s = document.getElementById('seri').value, p = document.getElementById('pin').value;
+            if(!s || !p) return alert("Nhập đủ!");
+            data.pendingCards.push({ user: data.currentUser, type: t, amount: a, seri: s, pin: p, rec: Math.floor(a*RATES[t]) });
+            save(); alert("Đã gửi! Chờ admin.");
+        }
+
+        function renderAdminCards() {
+            let h = "";
+            data.pendingCards.forEach((c, i) => {
+                h += `<div class="card p-info"><b>${c.user}</b> nạp ${c.type} ${c.amount}đ<br>PIN: ${c.pin}<br>
+                <button class="btn-main" onclick="approveCard(${i})" style="background:var(--green); margin-top:10px;">DUYỆT (+${c.rec}đ)</button></div>`;
+            });
+            document.getElementById('admin-card-list').innerHTML = h || "Trống.";
+        }
+
+        function approveCard(i) {
+            const c = data.pendingCards[i];
+            data.users[c.user].balance += c.rec;
+            data.pendingCards.splice(i, 1); save(); renderAdminCards(); updateUI();
+        }
+
+        function updateAdminTime() {
+            const p = document.getElementById('adm-p').value, t = document.getElementById('adm-t');
+            t.innerHTML = "";
+            let opts = (p==='Zygame') ? ["1day","3day","7day","30day"] : (p==='Drip' ? ["1day","7day","30day"] : ["vinhvien"]);
+            opts.forEach(o => t.innerHTML += `<option value="${o}">${o}</option>`);
+        }
+
+        function adminAddKey() {
+            const p = document.getElementById('adm-p').value, t = document.getElementById('adm-t').value;
+            const keys = document.getElementById('adm-keys').value.trim().split('\n').filter(k => k!=="");
+            data.stock[`${p}_${t}`] = [...data.stock[`${p}_${t}`], ...keys];
+            save(); alert("Xong!"); document.getElementById('adm-keys').value = ""; renderStockReport();
+        }
+
+        function renderStockReport() {
+            let h = ""; for(let k in data.stock) h += `<div>${k}: ${data.stock[k].length}</div>`;
+            document.getElementById('stock-report').innerHTML = h;
+        }
+
+        function showPage(p) {
+            ['home', 'history', 'napthe', 'admin-keys', 'admin-cards'].forEach(id => document.getElementById('page-'+id).style.display = (p===id ? 'block' : 'none'));
+            if(p==='home') { checkStockUI('Zygame'); checkStockUI('Drip'); checkStockUI('Clone'); }
+            if(p==='admin-cards') renderAdminCards();
+            if(p==='admin-keys') { updateAdminTime(); renderStockReport(); }
+            if(p==='history') {
+                let h = ""; (data.orders[data.currentUser]||[]).forEach(o => h += `<div class="card p-info"><b>${o.name}</b><div class="key-view">${o.key}</div></div>`);
+                document.getElementById('history-list').innerHTML = h || "Trống.";
+            }
+            document.getElementById('sidebar').classList.remove('active');
+        }
+
+        function updateUI() { document.getElementById('top-balance').innerText = data.users[data.currentUser].balance.toLocaleString() + "đ"; }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+        function logout() { data.currentUser = null; save(); location.reload(); }
+        window.onload = () => { if(data.currentUser) login(); updateRate(); };
+    </script>
+</body>
+                  </html>
+                  
